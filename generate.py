@@ -45,7 +45,10 @@ def get_pub_md(context, config):
         formatted_authors = []
         for author in immut_author_list:
             new_auth = author.split(", ")
-            new_auth = new_auth[1][0] + ". " + new_auth[0]
+            if len(new_auth[1]):
+                new_auth = new_auth[1][0] + ". " + new_auth[0]
+            else:
+                continue
             if new_auth == config['name']:
                 new_auth = "<strong>" + new_auth + "</strong>"
             formatted_authors.append(new_auth)
@@ -63,8 +66,9 @@ def get_pub_md(context, config):
         #         pub['link'], title)
         title = title.replace("\n", " ")
 
-        assert('_venue' in pub and 'year' in pub)
-        yearVenue = "{} {}".format(pub['_venue'], pub['year'])
+        print(pub)
+        assert('journal' in pub and 'year' in pub)
+        yearVenue = "{} {}".format(pub['journal'], pub['year'])
 
         imgStr = '<img src="images/publications/{}.png"/>'.format(pub['ID'])
         links = ['[{}{}]'.format(prefix, gidx)]
@@ -119,7 +123,7 @@ def get_pub_md(context, config):
 
     def load_and_replace(bibtex_file):
         with open(os.path.join('publications', bibtex_file), 'r') as f:
-            p = BibTexParser(f.read(), bc.author).get_entry_list()
+            p = BibTexParser(f.read(), customization=bc.author).get_entry_list()
         for pub in p:
             for field in pub:
                 pub[field] = context.make_replacements(pub[field])
@@ -235,8 +239,8 @@ class RenderContext(object):
                 section_template_name = os.path.join(self.SECTIONS_DIR, 'news.md')
                 section_data['items'] = section_content
             elif section_tag in ['coursework', 'education', 'honors',
-                                 'industry', 'research',
-                                 'skills', 'teaching']:
+                                 'industry', 'employment', 'research',
+                                 'skills', 'teaching', 'grants', 'memberships']:
                 section_data['items'] = section_content
                 section_template_name = os.path.join(
                     self.SECTIONS_DIR, section_tag + self._file_ending)

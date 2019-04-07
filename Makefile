@@ -14,6 +14,7 @@ BUILD_DIR=build
 TEX=$(BUILD_DIR)/cv.tex
 PDF=$(BUILD_DIR)/cv.pdf
 MD=$(BUILD_DIR)/cv.md
+HTML=$(BUILD_DIR)/cv.html
 
 ifneq ("$(wildcard cv.hidden.yaml)","")
 	YAML_FILES = cv.yaml cv.hidden.yaml
@@ -23,7 +24,7 @@ endif
 
 .PHONY: all public viewpdf stage jekyll push clean
 
-all: $(PDF) $(MD)
+all: $(PDF) $(MD) $(HTML)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -33,6 +34,9 @@ public: $(BUILD_DIR) $(TEMPLATES) $(YAML_FILES) generate.py
 
 $(TEX) $(MD): $(TEMPLATES) $(YAML_FILES) generate.py
 	./generate.py $(YAML_FILES)
+
+$(HTML): $(MD)
+	pandoc --from markdown_github $(MD) --to html > $(HTML)
 
 $(PDF): $(TEX) publications/*.bib
 	# TODO: Hack for biber on OSX.
